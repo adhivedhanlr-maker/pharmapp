@@ -226,13 +226,13 @@ export default function Home() {
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">© 2026 South India Ledger Systems PVT LTD.</p>
           </div>
 
-          <div className="flex flex-col items-center md:items-end gap-6 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+          <div className="flex flex-col items-center md:items-end gap-6 text-[10px] text-slate-600 font-black uppercase tracking-widest">
             <nav className="flex gap-8">
               <Link className="hover:text-primary transition-colors" href="#">System Standard</Link>
               <Link className="hover:text-primary transition-colors" href="#">Legal</Link>
               <Link className="hover:text-primary transition-colors" href="#">Developer API</Link>
             </nav>
-            <div className="flex items-center gap-4 text-slate-300">
+            <div className="flex items-center gap-4 text-slate-500 font-bold">
               <Shield className="h-4 w-4" /> ISO-Secure Framework
             </div>
           </div>

@@ -36,135 +36,103 @@ const data = [
 
 export default function DistributorDashboard() {
     return (
-        <div className="flex h-screen bg-slate-50">
-            {/* Sidebar */}
-            <aside className="w-64 bg-white border-r hidden lg:flex flex-col">
-                <div className="p-6">
-                    <span className="text-2xl font-bold text-primary">Pharma<span className="text-secondary">App</span></span>
+        <div className="p-4 md:p-8">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tighter text-slate-900">Distributor Dashboard</h1>
+                    <p className="text-slate-500 font-medium">Welcome back, Kerala Medicos Ltd.</p>
                 </div>
-                <nav className="flex-1 px-4 space-y-2">
-                    <Button variant="ghost" className="w-full justify-start text-primary bg-primary/5">
-                        <LayoutDashboard className="h-5 w-5 mr-3" /> Dashboard
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <ShoppingCart className="h-5 w-5 mr-3" /> Orders
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Package className="h-5 w-5 mr-3" /> Inventory
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Users className="h-5 w-5 mr-3" /> Salesmen
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <FileText className="h-5 w-5 mr-3" /> Invoices
-                    </Button>
-                </nav>
-                <div className="p-4 border-t">
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Settings className="h-5 w-5 mr-3" /> Settings
-                    </Button>
+                <div className="flex gap-4">
+                    <Button variant="outline" className="border-slate-200 font-bold">Subscription: Pro Plan</Button>
+                    <Button className="bg-primary text-white font-bold shadow-lg shadow-primary/20">Upload New Stock (Excel)</Button>
                 </div>
-            </aside>
+            </div>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-4 md:p-8">
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold">Distributor Dashboard</h1>
-                        <p className="text-muted-foreground">Welcome back, Kerala Medicos Ltd.</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <Button variant="outline">Subscription: Pro Plan</Button>
-                        <Button className="bg-primary text-white">Upload New Stock (Excel)</Button>
-                    </div>
-                </div>
+            {/* Stats Grid */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+                <Card className="hover:shadow-md transition-shadow border-slate-100">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500">Today's Orders</CardTitle>
+                        <ShoppingCart className="h-4 w-4 text-slate-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-black text-slate-900">42</div>
+                        <p className="text-xs text-emerald-600 flex items-center mt-1 font-bold">
+                            <TrendingUp className="h-3 w-3 mr-1" /> +12% from yesterday
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="hover:shadow-md transition-shadow border-slate-100">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500">Pending Orders</CardTitle>
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-black text-slate-900">15</div>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">Requires immediate action</p>
+                    </CardContent>
+                </Card>
+                <Card className="hover:shadow-md transition-shadow border-slate-100">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500">Revenue (MTD)</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-black text-slate-900">₹ 8.42L</div>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">On track for ₹ 12L target</p>
+                    </CardContent>
+                </Card>
+                <Card className="hover:shadow-md transition-shadow border-slate-100">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500">Low Stock Alerts</CardTitle>
+                        <Package className="h-4 w-4 text-rose-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-black text-slate-900">8</div>
+                        <p className="text-xs text-rose-600 mt-1 font-bold">Critical items below margin</p>
+                    </CardContent>
+                </Card>
+            </div>
 
-                {/* Stats Grid */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                    <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">Today's Orders</CardTitle>
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">42</div>
-                            <p className="text-xs text-green-600 flex items-center mt-1">
-                                <TrendingUp className="h-3 w-3 mr-1" /> +12% from yesterday
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-                            <AlertTriangle className="h-4 w-4 text-orange-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">15</div>
-                            <p className="text-xs text-muted-foreground mt-1">Requires immediate action</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">Revenue (MTD)</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">₹ 8.42L</div>
-                            <p className="text-xs text-muted-foreground mt-1">On track for ₹ 12L target</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">Low Stock Alerts</CardTitle>
-                            <Package className="h-4 w-4 text-red-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">8</div>
-                            <p className="text-xs text-red-600 mt-1">Critical items below margin</p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Charts Section */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                    <Card className="lg:col-span-4">
-                        <CardHeader>
-                            <CardTitle>Sales Revenue Weekly</CardTitle>
-                            <CardDescription>Performance comparison for last 7 days</CardDescription>
-                        </CardHeader>
-                        <CardContent className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                    />
-                                    <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                    <Card className="lg:col-span-3">
-                        <CardHeader>
-                            <CardTitle>Order Trends</CardTitle>
-                            <CardDescription>Volume of orders per day</CardDescription>
-                        </CardHeader>
-                        <CardContent className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={data}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Line type="monotone" dataKey="orders" stroke="hsl(var(--secondary))" strokeWidth={2} dot={{ r: 4 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </div>
-            </main>
+            {/* Charts Section */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="lg:col-span-4 border-slate-100">
+                    <CardHeader>
+                        <CardTitle className="font-black text-slate-900">Sales Revenue Weekly</CardTitle>
+                        <CardDescription className="text-slate-500 font-medium">Performance comparison for last 7 days</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                />
+                                <Bar dataKey="revenue" fill="#1e40af" radius={[6, 6, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+                <Card className="lg:col-span-3 border-slate-100">
+                    <CardHeader>
+                        <CardTitle className="font-black text-slate-900">Order Trends</CardTitle>
+                        <CardDescription className="text-slate-500 font-medium">Volume of orders per day</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={data}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <Tooltip />
+                                <Line type="monotone" dataKey="orders" stroke="#0d9488" strokeWidth={3} dot={{ r: 4, fill: '#0d9488', strokeWidth: 2, stroke: '#fff' }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
