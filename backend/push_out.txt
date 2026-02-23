@@ -1,0 +1,8 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./prisma/dev.db"
+
+SQLite database dev.db created at file:./prisma/dev.db
+
+Your database is now in sync with your Prisma schema. Done in 149ms
+

@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite does not support enums.
+// Role and status fields use String with validation at the app layer.
+// Valid UserRole values: ADMIN | DISTRIBUTOR | RETAILER | SALESMAN | CUSTOMER
+// Valid UserStatus values: PENDING | ACTIVE | SUSPENDED
+// Valid OrderStatus values: PENDING | ACCEPTED | REJECTED | SHIPPED | DELIVERED | CANCELLED
+
+model Tenant {
+  id           String        @id @default(cuid())
+  name         String
+  domain       String?       @unique
+  createdAt    DateTime      @default(now())
+  users        User[]
+  distributors Distributor[]
+  retailers    Retailer[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("CUSTOMER")
+  status    String   @default("PENDING")
+  name      String?
+  phone     String?  @unique
+  tenantId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id])
+  distributor   Distributor?
+  retailer      Retailer?
+  salesman      Salesman?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  searchLogs    SearchLog[]
+}
+
+model Distributor {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  tenantId      String?
+  companyName   String
+  address       String
+  gstNumber     String? @unique
+  licenseNumber String?
+  district      String
+  state         String  @default("Kerala")
+  minOrderValue Float   @default(0)
+  autoRejectMin Int?
+
+  user          User                   @relation(fields: [userId], references: [id])
+  tenant        Tenant?                @relation(fields: [tenantId], references: [id])
+  inventory     DistributorInventory[]
+  orders        Order[]
+  salesmen      Salesman[]
+  subscriptions Subscription[]
+  creditLedgers CreditLedger[]
+}
+
+model Retailer {
+  id                String  @id @default(cuid())
+  userId            String  @unique
+  tenantId          String?
+  shopName          String
+  address           String
+  district          String
+  pincode           String
+  preferredSalesman String?
+  isB2COnline       Boolean @default(false)
+  creditLimit       Float   @default(0)
+  currentCredit     Float   @default(0)
+
+  user          User           @relation(fields: [userId], references: [id])
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id])
+  orders        Order[]
+  prescriptions Prescription[]
+  creditLedgers CreditLedger[]
+}
+
+model Salesman {
+  id             String @id @default(cuid())
+  userId         String @unique
+  distributorId  String
+  commissionRate Float  @default(0)
+
+  user        User        @relation(fields: [userId], references: [id])
+  distributor Distributor @relation(fields: [distributorId], references: [id])
+  orders      Order[]
+}
+
+model ProductMaster {
+  id            String  @id @default(cuid())
+  name          String
+  genericName   String
+  composition   String?
+  company       String
+  division      String?
+  strength      String?
+  form          String?
+  schedule      String?
+  hsnCode       String?
+  gstPercentage Float   @default(12)
+
+  inventory DistributorInventory[]
+
+  @@index([name])
+  @@index([genericName])
+}
+
+model DistributorInventory {
+  id            String   @id @default(cuid())
+  distributorId String
+  productId     String
+  ptr           Float
+  mrp           Float
+  stock         Int      @default(0)
+  expiry        DateTime
+  batchNumber   String?
+
+  distributor Distributor   @relation(fields: [distributorId], references: [id])
+  product     ProductMaster @relation(fields: [productId], references: [id])
+  orderItems  OrderItem[]
+
+  @@unique([distributorId, productId])
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  retailerId    String
+  distributorId String
+  salesmanId    String?
+  status        String   @default("PENDING")
+  totalAmount   Float
+  gstAmount     Float
+  isPaid        Boolean  @default(false)
+  invoicePath   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  retailer      Retailer       @relation(fields: [retailerId], references: [id])
+  distributor   Distributor    @relation(fields: [distributorId], references: [id])
+  salesman      Salesman?      @relation(fields: [salesmanId], references: [id])
+  items         OrderItem[]
+  payments      Payment[]
+  creditLedgers CreditLedger[]
+
+  @@index([status])
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  inventoryId  String
+  quantity     Int
+  priceAtOrder Float
+  totalAmount  Float
+
+  order     Order                @relation(fields: [orderId], references: [id])
+  inventory DistributorInventory @relation(fields: [inventoryId], references: [id])
+}
+
+model CreditLedger {
+  id            String   @id @default(cuid())
+  distributorId String
+  retailerId    String
+  orderId       String?  @unique
+  amount        Float
+  type          String
+  balance       Float
+  createdAt     DateTime @default(now())
+
+  distributor Distributor @relation(fields: [distributorId], references: [id])
+  retailer    Retailer    @relation(fields: [retailerId], references: [id])
+  order       Order?      @relation(fields: [orderId], references: [id])
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  distributorId String
+  planName      String
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  status        String   @default("ACTIVE")
+
+  distributor Distributor @relation(fields: [distributorId], references: [id])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  orderId           String
+  amount            Float
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?  @unique
+  status            String   @default("PENDING")
+  createdAt         DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Prescription {
+  id          String   @id @default(cuid())
+  retailerId  String?
+  imageUrl    String
+  status      String   @default("PENDING")
+  scannedText String?
+  createdAt   DateTime @default(now())
+
+  retailer Retailer? @relation(fields: [retailerId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   String?
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SearchLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  query        String
+  resultsCount Int
+  timestamp    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([query])
+}
+
+model AnalyticsDaily {
+  id            String   @id @default(cuid())
+  date          DateTime @unique
+  totalOrders   Int
+  totalRevenue  Float
+  totalSearches Int
+  topProduct    String?
+  districtStats String?
+}
