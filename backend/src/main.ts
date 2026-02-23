@@ -7,8 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Global prefix
-  app.setGlobalPrefix('api');
+  // Global prefix; keep root and health unprefixed for platform checks.
+  app.setGlobalPrefix('api', {
+    exclude: ['/', '/health'],
+  });
 
   // CORS
   const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';

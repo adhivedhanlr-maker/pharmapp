@@ -48,7 +48,11 @@ export default function LoginPage() {
             };
             router.push(roleRedirects[user.role] || "/search");
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Invalid credentials");
+            if (!err?.response) {
+                toast.error("Auth server is unavailable. Backend DB connection is down.");
+            } else {
+                toast.error(err?.response?.data?.message || "Invalid credentials");
+            }
         } finally {
             setIsLoading(false);
         }

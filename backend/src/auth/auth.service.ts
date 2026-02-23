@@ -13,8 +13,10 @@ export class AuthService {
     ) { }
 
     async register(dto: RegisterDto) {
+        const normalizedEmail = dto.email.trim().toLowerCase();
+
         const existingUser = await this.prisma.user.findUnique({
-            where: { email: dto.email },
+            where: { email: normalizedEmail },
         });
 
         if (existingUser) {
@@ -25,7 +27,7 @@ export class AuthService {
 
         const user = await this.prisma.user.create({
             data: {
-                email: dto.email,
+                email: normalizedEmail,
                 password: hashedPassword,
                 role: dto.role,
                 name: dto.name,
@@ -55,12 +57,13 @@ export class AuthService {
             });
         }
 
-        return this.login({ email: dto.email, password: dto.password });
+        return this.login({ email: normalizedEmail, password: dto.password });
     }
 
     async login(dto: LoginDto) {
+        const normalizedEmail = dto.email.trim().toLowerCase();
         const user = await this.prisma.user.findUnique({
-            where: { email: dto.email },
+            where: { email: normalizedEmail },
             include: {
                 distributor: { select: { id: true } },
                 retailer: { select: { id: true } },
@@ -68,8 +71,26 @@ export class AuthService {
             },
         });
 
-        if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+        if (!user) {
             throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const isBcryptHash = /^\$2[aby]\$\d{2}\$/.test(user.password);
+        const passwordOk = isBcryptHash
+            ? await bcrypt.compare(dto.password, user.password)
+            : dto.password === user.password;
+
+        if (!passwordOk) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        // Auto-migrate legacy plaintext passwords to bcrypt in production databases.
+        if (!isBcryptHash) {
+            const hashed = await bcrypt.hash(dto.password, 10);
+            await this.prisma.user.update({
+                where: { id: user.id },
+                data: { password: hashed },
+            });
         }
 
         const payload = { sub: user.id, email: user.email, role: user.role };
