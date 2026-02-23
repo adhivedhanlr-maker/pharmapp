@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,6 @@ import { useCartStore } from "@/store/cart-store";
 import { toast } from "sonner";
 
 export default function EnterpriseSearchPage() {
-    const searchParams = useSearchParams();
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const addItem = useCartStore((state) => state.addItem);
@@ -40,11 +38,12 @@ export default function EnterpriseSearchPage() {
     }, [query]);
 
     useEffect(() => {
-        const initialQuery = searchParams.get("q");
+        if (typeof window === "undefined") return;
+        const initialQuery = new URLSearchParams(window.location.search).get("q");
         if (initialQuery) {
             setQuery(initialQuery);
         }
-    }, [searchParams]);
+    }, []);
 
     const { data: results, isLoading } = useQuery({
         queryKey: ['search', debouncedQuery],
