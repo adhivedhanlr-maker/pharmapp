@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 async function main() {
     try {
-        console.log('🚀 Seeding PostgreSQL database on Render...');
+        console.log('🚀 Seeding PostgreSQL database on Render (FORCED UPDATE)...');
 
         // 1. Tenant
         const tenant = await prisma.tenant.upsert({
             where: { domain: 'market.pharmaapp.in' },
-            update: {},
+            update: { name: 'South India Pharma Market' },
             create: { name: 'South India Pharma Market', domain: 'market.pharmaapp.in' },
         });
         console.log(`✅ Tenant: ${tenant.name}`);
@@ -19,52 +19,40 @@ async function main() {
         const adminPwd = await bcrypt.hash('admin123', 10);
         await prisma.user.upsert({
             where: { email: 'admin@pharma.com' },
-            update: {},
+            update: { password: adminPwd, status: 'ACTIVE' },
             create: { email: 'admin@pharma.com', password: adminPwd, role: 'ADMIN', name: 'Super Admin', status: 'ACTIVE', tenantId: tenant.id },
         });
-        console.log('✅ Admin user created (admin@pharma.com / admin123)');
-
-        // 3. Products
-        const productData = [
-            { id: 'paracetamol_500mg', name: 'Paracetamol 500mg', genericName: 'Paracetamol', company: 'Sun Pharma', form: 'Tablet', gstPercentage: 12 },
-            { id: 'amoxicillin_250mg', name: 'Amoxicillin 250mg', genericName: 'Amoxicillin', company: 'Cipla', form: 'Capsule', gstPercentage: 12 },
-            { id: 'dolo_650mg', name: 'Dolo 650mg', genericName: 'Paracetamol', company: 'Micro Labs', form: 'Tablet', gstPercentage: 12 },
-        ];
-
-        for (const p of productData) {
-            await prisma.productMaster.upsert({ where: { id: p.id }, update: {}, create: p });
-        }
-        console.log(`✅ ${productData.length} Products created`);
+        console.log('✅ Admin user created/updated (admin@pharma.com / admin123)');
 
         // 4. Distributor
         const distPwd = await bcrypt.hash('distributor123', 10);
         const distUser = await prisma.user.upsert({
             where: { email: 'dist@pharma.com' },
-            update: {},
+            update: { password: distPwd, status: 'ACTIVE' },
             create: { email: 'dist@pharma.com', password: distPwd, role: 'DISTRIBUTOR', name: 'Kerala Medicos', status: 'ACTIVE', tenantId: tenant.id },
         });
         await prisma.distributor.upsert({
             where: { userId: distUser.id },
-            update: {},
+            update: { companyName: 'Kerala Medicos Ernakulam' },
             create: { userId: distUser.id, companyName: 'Kerala Medicos Ernakulam', address: 'MG Road', district: 'Ernakulam', gstNumber: '32DIST00001Z', minOrderValue: 2000, tenantId: tenant.id },
         });
-        console.log('✅ Distributor created (dist@pharma.com / distributor123)');
+        console.log('✅ Distributor created/updated (dist@pharma.com / distributor123)');
 
         // 5. Retailer
         const retPwd = await bcrypt.hash('retailer123', 10);
         const retUser = await prisma.user.upsert({
             where: { email: 'retailer@pharma.com' },
-            update: {},
+            update: { password: retPwd, status: 'ACTIVE' },
             create: { email: 'retailer@pharma.com', password: retPwd, role: 'RETAILER', name: 'City Medical Store', status: 'ACTIVE', tenantId: tenant.id },
         });
         await prisma.retailer.upsert({
             where: { userId: retUser.id },
-            update: {},
+            update: { shopName: 'City Medical Store' },
             create: { userId: retUser.id, shopName: 'City Medical Store', address: 'Hospital Road', district: 'Ernakulam', pincode: '682001', creditLimit: 50000, tenantId: tenant.id },
         });
-        console.log('✅ Retailer created (retailer@pharma.com / retailer123)');
+        console.log('✅ Retailer created/updated (retailer@pharma.com / retailer123)');
 
-        console.log('\n🎉 Seeding complete!');
+        console.log('\n🎉 Seeding complete! Try logging in now.');
     } catch (e) {
         console.error('❌ Seeding failed:', e);
     } finally {
