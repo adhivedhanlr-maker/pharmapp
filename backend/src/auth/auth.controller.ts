@@ -1,8 +1,9 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,5 +23,20 @@ export class AuthController {
     @ApiResponse({ status: 200, description: 'User successfully logged in' })
     async login(@Body() dto: LoginDto) {
         return this.authService.login(dto);
+    }
+
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Get authenticated user profile' })
+    async me(@Request() req: any) {
+        return {
+            id: req.user.id,
+            email: req.user.email,
+            role: req.user.role,
+            name: req.user.name,
+            distributor: req.user.distributor ?? undefined,
+            retailer: req.user.retailer ?? undefined,
+            salesman: req.user.salesman ?? undefined,
+        };
     }
 }

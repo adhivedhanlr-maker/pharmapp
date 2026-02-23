@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
     Search,
     ShoppingCart,
@@ -26,6 +27,7 @@ import { useCartStore } from "@/store/cart-store";
 import { toast } from "sonner";
 
 export default function EnterpriseSearchPage() {
+    const searchParams = useSearchParams();
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const addItem = useCartStore((state) => state.addItem);
@@ -36,6 +38,13 @@ export default function EnterpriseSearchPage() {
         }, 200);
         return () => clearTimeout(timer);
     }, [query]);
+
+    useEffect(() => {
+        const initialQuery = searchParams.get("q");
+        if (initialQuery) {
+            setQuery(initialQuery);
+        }
+    }, [searchParams]);
 
     const { data: results, isLoading } = useQuery({
         queryKey: ['search', debouncedQuery],
@@ -62,7 +71,6 @@ export default function EnterpriseSearchPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-50">
-            {/* Search Header */}
             <div className="bg-white border-b sticky top-0 z-40 py-6 px-4 shadow-sm">
                 <div className="container mx-auto max-w-7xl">
                     <div className="relative max-w-3xl mx-auto group">
@@ -103,7 +111,6 @@ export default function EnterpriseSearchPage() {
             </div>
 
             <div className="container mx-auto max-w-7xl px-4 py-8 flex gap-8">
-                {/* Filters Sidebar */}
                 <aside className="w-64 shrink-0 hidden lg:block space-y-8">
                     <div>
                         <h3 className="font-bold flex items-center mb-4"><Filter className="h-4 w-4 mr-2" /> Filters</h3>
@@ -124,8 +131,8 @@ export default function EnterpriseSearchPage() {
                                 <label className="text-sm font-medium">Price Range (PTR)</label>
                                 <Slider defaultValue={[0, 1000]} max={5000} step={100} className="mt-4" />
                                 <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                                    <span>₹0</span>
-                                    <span>₹5000+</span>
+                                    <span>Rs 0</span>
+                                    <span>Rs 5000+</span>
                                 </div>
                             </div>
 
@@ -141,7 +148,6 @@ export default function EnterpriseSearchPage() {
                     </div>
                 </aside>
 
-                {/* Search Results Area */}
                 <section className="flex-1">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-semibold">
@@ -179,8 +185,8 @@ export default function EnterpriseSearchPage() {
                                         <div className="w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 shrink-0 bg-slate-50 sm:bg-transparent p-4 sm:p-0 rounded-xl">
                                             <div className="text-right">
                                                 <div className="flex items-baseline gap-2">
-                                                    <span className="text-3xl font-black text-primary">₹{item.ptr}</span>
-                                                    <span className="text-sm text-muted-foreground line-through">MRP ₹{item.mrp}</span>
+                                                    <span className="text-3xl font-black text-primary">Rs {item.ptr}</span>
+                                                    <span className="text-sm text-muted-foreground line-through">MRP Rs {item.mrp}</span>
                                                 </div>
                                                 <p className="text-[10px] text-green-600 font-bold uppercase">Margin: {Math.round((item.mrp - item.ptr) / item.mrp * 100)}%</p>
                                             </div>

@@ -61,6 +61,11 @@ export class AuthService {
     async login(dto: LoginDto) {
         const user = await this.prisma.user.findUnique({
             where: { email: dto.email },
+            include: {
+                distributor: { select: { id: true } },
+                retailer: { select: { id: true } },
+                salesman: { select: { id: true } },
+            },
         });
 
         if (!user || !(await bcrypt.compare(dto.password, user.password))) {
@@ -75,6 +80,9 @@ export class AuthService {
                 email: user.email,
                 role: user.role,
                 name: user.name,
+                distributor: user.distributor ?? undefined,
+                retailer: user.retailer ?? undefined,
+                salesman: user.salesman ?? undefined,
             },
         };
     }

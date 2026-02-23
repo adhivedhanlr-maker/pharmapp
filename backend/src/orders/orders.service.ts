@@ -120,6 +120,18 @@ export class OrdersService {
         });
     }
 
+    async getSalesmanOrders(salesmanId: string) {
+        return this.prisma.order.findMany({
+            where: { salesmanId },
+            include: {
+                distributor: { select: { id: true, companyName: true, district: true } },
+                retailer: { select: { id: true, shopName: true, district: true } },
+                items: { include: { inventory: { include: { product: true } } } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
     async updateOrderStatus(orderId: string, status: OrderStatus) {
         return this.prisma.order.update({
             where: { id: orderId },

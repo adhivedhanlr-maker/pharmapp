@@ -21,7 +21,7 @@ class CreateOrderDto {
 
 @ApiTags('orders')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('orders')
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }
@@ -45,6 +45,13 @@ export class OrdersController {
     @ApiOperation({ summary: 'Get all incoming orders for the distributor' })
     async getDistributorOrders(@Request() req: any) {
         return this.ordersService.getDistributorOrders(req.user.distributor.id);
+    }
+
+    @Get('salesman')
+    @Roles('SALESMAN')
+    @ApiOperation({ summary: 'Get all assigned orders for the salesman' })
+    async getSalesmanOrders(@Request() req: any) {
+        return this.ordersService.getSalesmanOrders(req.user.salesman.id);
     }
 
     @Patch(':id/status')
