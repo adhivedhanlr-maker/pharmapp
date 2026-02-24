@@ -138,7 +138,11 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background:
+      radial-gradient(1200px 540px at -10% -10%, rgba(30, 64, 175, 0.12), transparent 60%),
+      radial-gradient(1000px 500px at 110% 0%, rgba(13, 148, 136, 0.12), transparent 58%),
+      linear-gradient(180deg, #f7fbff 0%, #f8fafc 36%, #f3f6fc 100%);
   }
 }
 
@@ -149,5 +153,41 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+.premium-app-bg {
+  background:
+    radial-gradient(800px 420px at 18% -10%, rgba(14, 116, 144, 0.14), transparent 58%),
+    radial-gradient(960px 460px at 90% -18%, rgba(30, 64, 175, 0.13), transparent 56%),
+    radial-gradient(1000px 600px at 50% 120%, rgba(15, 23, 42, 0.06), transparent 72%);
+}
+
+.liquid-bottom-nav {
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(244, 248, 255, 0.35)),
+    linear-gradient(225deg, rgba(30, 64, 175, 0.08), rgba(13, 148, 136, 0.06));
+  box-shadow:
+    0 14px 40px rgba(15, 23, 42, 0.16),
+    inset 0 1px 1px rgba(255, 255, 255, 0.75),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px) saturate(165%);
+  -webkit-backdrop-filter: blur(18px) saturate(165%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .liquid-bottom-nav {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
 }
