@@ -1,0 +1,21 @@
+{
+  "backendBaseUrl": "http://localhost:3001/api",
+  "retailerLogin": {
+    "email": "retailer0@pharma.com",
+    "password": "retailer123"
+  },
+  "connector": {
+    "name": "Pilot Connector",
+    "softwareType": "MARG_DIRECT_DB",
+    "syncIntervalMinutes": 10
+  },
+  "source": {
+    "dbKind": "sqlserver",
+    "host": "marg-db-host",
+    "port": 1433,
+    "database": "MARGERP",
+    "username": "readonly_user",
+    "password": "readonly_password",
+    "query": "SELECT ItemCode AS sku, ItemName AS product_name, GenericName AS generic_name, BatchNo AS batch_no, StockQty AS qty, ExpiryDate AS expiry_date, SupplierName AS supplier_name, SupplierPhone AS supplier_phone, SupplierCity AS supplier_location FROM StockMaster"
+  }
+}

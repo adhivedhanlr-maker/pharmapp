@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-    Search, ShoppingCart, Package, Clock, TrendingUp, CreditCard,
-    Bell, LogOut, User, LayoutDashboard, Shield
+    Search, ShoppingCart, Package, CreditCard,
+    LogOut, User, LayoutDashboard, Shield, Activity
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,7 @@ export default function RetailerLayout({
 
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/retailer" },
+        { icon: Activity, label: "Stock Intelligence", href: "/dashboard/retailer/stock-intelligence" },
         { icon: Search, label: "Browse Medicines", href: "/search" },
         { icon: ShoppingCart, label: "My Orders", href: "/dashboard/retailer/orders" },
         { icon: Package, label: "Prescriptions", href: "/dashboard/retailer/prescriptions" },

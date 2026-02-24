@@ -33,6 +33,14 @@ export default function DistributorDashboard() {
         },
     });
 
+    const { data: opportunities = [] } = useQuery({
+        queryKey: ["distributor-opportunities"],
+        queryFn: async () => {
+            const res = await api.get("/intelligence/distributor/opportunities");
+            return res.data;
+        },
+    });
+
     const stats = useMemo(() => {
         const now = new Date();
         const today = now.toDateString();
@@ -140,6 +148,47 @@ export default function DistributorDashboard() {
                     </CardContent>
                 </Card>
             </div>
+
+            <Card className="border-slate-100">
+                <CardHeader>
+                    <CardTitle className="font-black text-slate-900">Pharmacy Opportunities</CardTitle>
+                    <CardDescription className="text-slate-500 font-medium">
+                        Pharmacies with low stock or near-expiry where your inventory is a strong match.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                    {opportunities.length === 0 ? (
+                        <div className="p-6 text-sm text-slate-500">No opportunities yet. Add/refresh your stock to get matched.</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-slate-50/60 border-b">
+                                    <tr>
+                                        <th className="p-3 text-left font-semibold">Product</th>
+                                        <th className="p-3 text-left font-semibold">Pharmacy</th>
+                                        <th className="p-3 text-left font-semibold">Demand Qty</th>
+                                        <th className="p-3 text-left font-semibold">Your Stock</th>
+                                        <th className="p-3 text-left font-semibold">Phone</th>
+                                        <th className="p-3 text-left font-semibold">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {opportunities.slice(0, 15).map((item: any) => (
+                                        <tr key={item.matchId} className="border-b">
+                                            <td className="p-3 font-medium text-slate-900">{item.product}</td>
+                                            <td className="p-3">{item.pharmacy?.name} ({item.pharmacy?.district})</td>
+                                            <td className="p-3">{item.demand?.currentQty}</td>
+                                            <td className="p-3">{item.yourOffer?.availableStock}</td>
+                                            <td className="p-3">{item.pharmacy?.phone || '-'}</td>
+                                            <td className="p-3 font-semibold text-primary">{item.score}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }

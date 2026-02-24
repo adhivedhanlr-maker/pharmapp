@@ -1,11 +1,14 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UpsertDistributorInventoryDto } from './dto/upsert-distributor-inventory.dto';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('inventory')
 export class InventoryController {
     constructor(private readonly inventoryService: InventoryService) { }
@@ -29,5 +32,18 @@ export class InventoryController {
         @Query('district') district?: string,
     ) {
         return this.inventoryService.searchMarketplace(query || '', district);
+    }
+
+    @Post('distributor/upsert')
+    @Roles('DISTRIBUTOR')
+    @ApiOperation({ summary: 'Create or update distributor stock availability for a product' })
+    async upsertDistributorInventory(@Request() req: any, @Body() dto: UpsertDistributorInventoryDto) {
+        return this.inventoryService.updateStock(req.user.distributor.id, dto.productId, {
+            stock: dto.stock,
+            ptr: dto.ptr,
+            mrp: dto.mrp,
+            expiry: new Date(dto.expiry),
+            batchNumber: dto.batchNumber,
+        });
     }
 }

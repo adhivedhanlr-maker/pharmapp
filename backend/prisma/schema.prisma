@@ -79,11 +79,14 @@ model Retailer {
   creditLimit       Float   @default(0)
   currentCredit     Float   @default(0)
 
-  user          User           @relation(fields: [userId], references: [id])
-  tenant        Tenant?        @relation(fields: [tenantId], references: [id])
+  user          User                @relation(fields: [userId], references: [id])
+  tenant        Tenant?             @relation(fields: [tenantId], references: [id])
   orders        Order[]
   prescriptions Prescription[]
   creditLedgers CreditLedger[]
+  connectors    PharmacyConnector[]
+  stocks        RetailerStock[]
+  alerts        StockAlert[]
 }
 
 model Salesman {
@@ -110,7 +113,8 @@ model ProductMaster {
   hsnCode       String?
   gstPercentage Float   @default(12)
 
-  inventory DistributorInventory[]
+  inventory      DistributorInventory[]
+  retailerStocks RetailerStock[]
 
   @@index([name])
   @@index([genericName])
@@ -126,9 +130,10 @@ model DistributorInventory {
   expiry        DateTime
   batchNumber   String?
 
-  distributor Distributor   @relation(fields: [distributorId], references: [id])
-  product     ProductMaster @relation(fields: [productId], references: [id])
-  orderItems  OrderItem[]
+  distributor  Distributor   @relation(fields: [distributorId], references: [id])
+  product      ProductMaster @relation(fields: [productId], references: [id])
+  orderItems   OrderItem[]
+  stockMatches StockMatch[]
 
   @@unique([distributorId, productId])
 }
@@ -258,4 +263,94 @@ model AnalyticsDaily {
   totalSearches Int
   topProduct    String?
   districtStats String?
+}
+
+model PharmacyConnector {
+  id                  String             @id @default(cuid())
+  retailerId          String
+  name                String
+  softwareType        String
+  status              String             @default("ACTIVE")
+  syncIntervalMinutes Int                @default(15)
+  config              Json
+  lastSyncedAt        DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  retailer            Retailer           @relation(fields: [retailerId], references: [id])
+  syncRuns            ConnectorSyncRun[]
+  stocks              RetailerStock[]
+
+  @@index([retailerId, status])
+}
+
+model ConnectorSyncRun {
+  id              String            @id @default(cuid())
+  connectorId     String
+  status          String            @default("RUNNING")
+  recordsReceived Int               @default(0)
+  recordsUpserted Int               @default(0)
+  errorMessage    String?
+  startedAt       DateTime          @default(now())
+  endedAt         DateTime?
+  connector       PharmacyConnector @relation(fields: [connectorId], references: [id])
+
+  @@index([connectorId, startedAt])
+}
+
+model RetailerStock {
+  id                  String             @id @default(cuid())
+  retailerId          String
+  connectorId         String?
+  productId           String?
+  externalSku         String?
+  productName         String
+  genericName         String?
+  batchNumber         String             @default("")
+  quantity            Int                @default(0)
+  expiry              DateTime?
+  distributorName     String?
+  distributorContact  String?
+  distributorLocation String?
+  lastSeenAt          DateTime           @default(now())
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  retailer            Retailer           @relation(fields: [retailerId], references: [id])
+  connector           PharmacyConnector? @relation(fields: [connectorId], references: [id])
+  product             ProductMaster?     @relation(fields: [productId], references: [id])
+  alerts              StockAlert[]
+  matches             StockMatch[]
+
+  @@unique([retailerId, productName, batchNumber])
+  @@index([retailerId, quantity, expiry])
+}
+
+model StockAlert {
+  id             String        @id @default(cuid())
+  retailerId     String
+  stockId        String
+  type           String
+  severity       String
+  thresholdValue Int?
+  message        String
+  status         String        @default("OPEN")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  retailer       Retailer      @relation(fields: [retailerId], references: [id])
+  stock          RetailerStock @relation(fields: [stockId], references: [id])
+
+  @@index([retailerId, type, status])
+}
+
+model StockMatch {
+  id                     String               @id @default(cuid())
+  stockId                String
+  distributorInventoryId String
+  score                  Float
+  reason                 String?
+  createdAt              DateTime             @default(now())
+  stock                  RetailerStock        @relation(fields: [stockId], references: [id])
+  distributorInventory   DistributorInventory @relation(fields: [distributorInventoryId], references: [id])
+
+  @@unique([stockId, distributorInventoryId])
+  @@index([score])
 }

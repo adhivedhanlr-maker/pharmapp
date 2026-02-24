@@ -1,15 +1,26 @@
 ﻿'use client';
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function InventoryPage() {
+    const qc = useQueryClient();
     const [query, setQuery] = useState("");
+    const [form, setForm] = useState({
+        productId: "",
+        ptr: "",
+        mrp: "",
+        stock: "",
+        expiry: "",
+        batchNumber: "",
+    });
 
     const { data: me } = useQuery({
         queryKey: ["auth-me"],
@@ -30,6 +41,27 @@ export default function InventoryPage() {
         enabled: Boolean(distributorId),
     });
 
+    const upsertStock = useMutation({
+        mutationFn: async () => {
+            const payload = {
+                productId: form.productId.trim(),
+                ptr: Number(form.ptr),
+                mrp: Number(form.mrp),
+                stock: Number(form.stock),
+                expiry: form.expiry,
+                batchNumber: form.batchNumber.trim() || undefined,
+            };
+            const res = await api.post("/inventory/distributor/upsert", payload);
+            return res.data;
+        },
+        onSuccess: () => {
+            toast.success("Stock updated");
+            setForm((s) => ({ ...s, stock: "", batchNumber: "" }));
+            qc.invalidateQueries({ queryKey: ["distributor-inventory", distributorId] });
+        },
+        onError: () => toast.error("Failed to update stock"),
+    });
+
     const filtered = useMemo(() => {
         const needle = query.trim().toLowerCase();
         if (!needle) return inventory;
@@ -48,6 +80,28 @@ export default function InventoryPage() {
                 <h1 className="text-3xl font-black tracking-tighter text-slate-900">Inventory</h1>
                 <p className="text-slate-500 font-medium">Live stock visibility for your distributor catalog.</p>
             </div>
+
+            <Card className="border-slate-100 shadow-sm">
+                <CardHeader>
+                    <CardTitle className="font-black text-slate-800">Upload / Update Stock</CardTitle>
+                    <CardDescription className="text-slate-500 font-medium">
+                        Enter product details from your ERP/POS sync to publish availability.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-3 md:grid-cols-3">
+                    <Input placeholder="Product ID" value={form.productId} onChange={(e) => setForm((s) => ({ ...s, productId: e.target.value }))} />
+                    <Input placeholder="PTR" value={form.ptr} onChange={(e) => setForm((s) => ({ ...s, ptr: e.target.value }))} />
+                    <Input placeholder="MRP" value={form.mrp} onChange={(e) => setForm((s) => ({ ...s, mrp: e.target.value }))} />
+                    <Input placeholder="Stock Qty" value={form.stock} onChange={(e) => setForm((s) => ({ ...s, stock: e.target.value }))} />
+                    <Input placeholder="Expiry (YYYY-MM-DD)" value={form.expiry} onChange={(e) => setForm((s) => ({ ...s, expiry: e.target.value }))} />
+                    <Input placeholder="Batch Number" value={form.batchNumber} onChange={(e) => setForm((s) => ({ ...s, batchNumber: e.target.value }))} />
+                    <div className="md:col-span-3">
+                        <Button onClick={() => upsertStock.mutate()} disabled={upsertStock.isPending}>
+                            Save Availability
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card className="border-slate-100 shadow-sm">
                 <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6 flex flex-row items-center justify-between">
