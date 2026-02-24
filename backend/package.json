@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "pilot:run": "node scripts/pharmacy-pilot-agent.cjs scripts/pilot-config.json",
+    "seed:mass": "node scripts/seed-mass.cjs",
     "build:connector-exe": "pkg scripts/pharmacy-pilot-agent.cjs --targets node18-win-x64 --output dist/PharmaConnector.exe && node scripts/package-connector.cjs"
   },
   "dependencies": {

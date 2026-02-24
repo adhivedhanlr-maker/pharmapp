@@ -7,6 +7,13 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 
 db.exec(`
+CREATE TABLE IF NOT EXISTS Tenant (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  domain TEXT UNIQUE,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS User (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
