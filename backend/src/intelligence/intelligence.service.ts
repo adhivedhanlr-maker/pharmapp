@@ -1,5 +1,4 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateConnectorDto } from './dto/create-connector.dto';
 import { SyncRecordInput } from './dto/sync-connector.dto';
@@ -56,7 +55,7 @@ export class IntelligenceService {
         name: dto.name,
         softwareType: dto.softwareType,
         syncIntervalMinutes: dto.syncIntervalMinutes ?? 15,
-        config: dto.config as Prisma.JsonObject,
+        config: JSON.stringify(dto.config ?? {}),
       },
     });
   }
@@ -232,7 +231,7 @@ export class IntelligenceService {
     });
     if (!connector) throw new NotFoundException('Connector not found');
 
-    const normalized = this.normalizeRawRows(rows, (connector.config ?? {}) as ConnectorConfig);
+    const normalized = this.normalizeRawRows(rows, this.parseConnectorConfig(connector.config));
     return this.syncConnector(retailerId, connectorId, normalized);
   }
 
@@ -249,7 +248,7 @@ export class IntelligenceService {
 
     if (!connector) throw new NotFoundException('Connector not found');
 
-    const config = (connector.config ?? {}) as ConnectorConfig;
+    const config = this.parseConnectorConfig(connector.config);
     const source = config.source;
     if (!source || source.type !== 'direct_db') {
       return { skipped: true, reason: 'Connector source.type is not direct_db' };
@@ -408,6 +407,16 @@ export class IntelligenceService {
         ],
       },
     });
+  }
+
+  private parseConnectorConfig(raw: string | null | undefined): ConnectorConfig {
+    if (!raw) return {};
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? (parsed as ConnectorConfig) : {};
+    } catch {
+      return {};
+    }
   }
 
   private normalizeRawRows(rows: Record<string, unknown>[], config: ConnectorConfig): SyncRecordInput[] {
@@ -596,7 +605,6 @@ export class IntelligenceService {
             score: entry.score,
             reason: entry.reason,
           })),
-          skipDuplicates: true,
         });
       }
     }

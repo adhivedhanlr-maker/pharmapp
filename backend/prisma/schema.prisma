@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -272,7 +272,7 @@ model PharmacyConnector {
   softwareType        String
   status              String             @default("ACTIVE")
   syncIntervalMinutes Int                @default(15)
-  config              Json
+  config              String             @default("{}")
   lastSyncedAt        DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

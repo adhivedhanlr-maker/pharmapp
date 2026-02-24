@@ -35,7 +35,7 @@ export class IntelligenceScheduler {
       const due = !last || now - last >= intervalMs;
 
       if (!due) continue;
-      const config = (connector.config ?? {}) as Record<string, unknown>;
+      const config = this.parseConnectorConfig(connector.config);
       const source = (config.source ?? {}) as Record<string, unknown>;
       if (source.type !== 'direct_db') continue;
 
@@ -49,6 +49,16 @@ export class IntelligenceScheduler {
           ),
         )
         .finally(() => this.running.delete(connector.id));
+    }
+  }
+
+  private parseConnectorConfig(raw: string | null | undefined): Record<string, unknown> {
+    if (!raw) return {};
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
     }
   }
 }
